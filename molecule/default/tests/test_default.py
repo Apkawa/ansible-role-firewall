@@ -8,38 +8,38 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 
 def test_rules(host):
-    cmd = host.run('iptables -L')
+    cmd = host.run('iptables -L -n')
     assert cmd.rc == 0
     assert cmd.stdout.strip() == """
 Chain INPUT (policy ACCEPT)
 target     prot opt source               destination         
-ACCEPT     all  --  anywhere             anywhere            
-ACCEPT     tcp  --  anywhere             anywhere             tcp dpt:grcp
-ACCEPT     tcp  --  dns.google           anywhere             tcp dpt:afrog
-DROP       tcp  --  anywhere             anywhere             tcp dpt:afrog
-ACCEPT     tcp  --  10.0.0.0/24          anywhere             tcp dpt:boinc-client
-ACCEPT     tcp  --  10.0.0.0/24          anywhere             tcp dpt:boinc-client
-DROP       tcp  --  10.0.0.0/24          anywhere             tcp dpt:boinc-client
-ACCEPT     tcp  --  10.0.0.1             anywhere             tcp dpt:dcutility
-DROP       tcp  --  10.0.0.0/24          anywhere             tcp dpt:dcutility
-ACCEPT     udp  --  anywhere             anywhere             udp dpt:9123
-ACCEPT     udp  --  dns.google           anywhere             udp dpt:afrog
-DROP       udp  --  anywhere             anywhere             udp dpt:afrog
-ACCEPT     udp  --  10.0.0.0/24          anywhere             udp dpt:boinc-client
-ACCEPT     udp  --  10.0.0.0/24          anywhere             udp dpt:boinc-client
-DROP       udp  --  10.0.0.0/24          anywhere             udp dpt:boinc-client
-ACCEPT     udp  --  10.0.0.1             anywhere             udp dpt:dcutility
-DROP       udp  --  10.0.0.0/24          anywhere             udp dpt:dcutility
-ACCEPT     icmp --  anywhere             anywhere            
-ACCEPT     udp  --  anywhere             anywhere             udp spt:ntp
-ACCEPT     all  --  anywhere             anywhere             state RELATED,ESTABLISHED
-LOG        all  --  anywhere             anywhere             limit: avg 15/min burst 5 LOG level debug prefix "Dropped by firewall: "
-DROP       all  --  anywhere             anywhere            
+ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0           
+ACCEPT     tcp  --  0.0.0.0/0            0.0.0.0/0            tcp dpt:9123
+ACCEPT     tcp  --  8.8.8.8              0.0.0.0/0            tcp dpt:1042
+DROP       tcp  --  0.0.0.0/0            0.0.0.0/0            tcp dpt:1042
+ACCEPT     tcp  --  10.0.0.0/24          0.0.0.0/0            tcp dpt:1043
+ACCEPT     tcp  --  10.0.0.0/24          0.0.0.0/0            tcp dpt:1043
+DROP       tcp  --  10.0.0.0/24          0.0.0.0/0            tcp dpt:1043
+ACCEPT     tcp  --  10.0.0.1             0.0.0.0/0            tcp dpt:1044
+DROP       tcp  --  10.0.0.0/24          0.0.0.0/0            tcp dpt:1044
+ACCEPT     udp  --  0.0.0.0/0            0.0.0.0/0            udp dpt:9123
+ACCEPT     udp  --  8.8.8.8              0.0.0.0/0            udp dpt:1042
+DROP       udp  --  0.0.0.0/0            0.0.0.0/0            udp dpt:1042
+ACCEPT     udp  --  10.0.0.0/24          0.0.0.0/0            udp dpt:1043
+ACCEPT     udp  --  10.0.0.0/24          0.0.0.0/0            udp dpt:1043
+DROP       udp  --  10.0.0.0/24          0.0.0.0/0            udp dpt:1043
+ACCEPT     udp  --  10.0.0.1             0.0.0.0/0            udp dpt:1044
+DROP       udp  --  10.0.0.0/24          0.0.0.0/0            udp dpt:1044
+ACCEPT     icmp --  0.0.0.0/0            0.0.0.0/0           
+ACCEPT     udp  --  0.0.0.0/0            0.0.0.0/0            udp spt:123
+ACCEPT     all  --  0.0.0.0/0            0.0.0.0/0            state RELATED,ESTABLISHED
+LOG        all  --  0.0.0.0/0            0.0.0.0/0            limit: avg 15/min burst 5 LOG flags 0 level 7 prefix "Dropped by firewall: "
+DROP       all  --  0.0.0.0/0            0.0.0.0/0           
 
 Chain FORWARD (policy ACCEPT)
 target     prot opt source               destination         
 
 Chain OUTPUT (policy ACCEPT)
 target     prot opt source               destination         
-ACCEPT     udp  --  anywhere             anywhere             udp dpt:ntp
+ACCEPT     udp  --  0.0.0.0/0            0.0.0.0/0            udp dpt:123
 """.strip()

@@ -27,6 +27,9 @@ env:
     # check ansible version on debian10
     - TOX_ENV=ansible24-debian10
     - TOX_ENV=ansible28-debian10
+    # check rules with docker
+    - TOX_ENV=centos7-docker
+    - TOX_ENV=debian10-docker
 
 matrix:
   fast_finish: true
