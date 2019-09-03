@@ -1,0 +1,23 @@
+---
+
+- name: Save docker iptables
+  command: >
+    iptables --list-rules
+  register: _docker_rules
+  changed_when: "'error' in _docker_rules.stdout"
+
+- debug: var=_docker_rules
+
+- name: Store DOCKER chain rules
+  set_fact:
+    firewall_docker_rules: >-
+      {%- set rules=['-A INPUT -i docker0 -j ACCEPT'] %}
+      {%- for line in _docker_rules.stdout.splitlines() %}
+        {%- if 'DOCKER' in line -%}
+          {%- set _=rules.append(line) -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {{ rules }}
+
+
+- debug: var=firewall_docker_rules

@@ -2,6 +2,9 @@
 - name: Ensure iptables is present.
   package: name=iptables state=present
 
+- include: docker.yml
+  when: firewall_keep_docker_rules
+
 - name: Flush iptables the first time playbook runs.
   command: >
     iptables -F

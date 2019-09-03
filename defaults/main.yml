@@ -1,12 +1,22 @@
 ---
 firewall_state: started
 firewall_enabled_at_boot: true
+firewall_ipv6: true
 
 firewall_allowed_tcp_ports:
   - "22"
   - "25"
   - "80"
   - "443"
+  # example
+  # - port: 1042
+  #   allow: 8.8.8.8
+  #   allow: 8.8.8.0/24
+  #   allow: ['8.8.8.1', '8.8.8.2']
+  #   # by default none
+  #   deny: ['8.8.4.4', '0.0.0.0/0']
+  #   deny: yes # 0.0.0.0/0
+  #   deny: 8.8.4.0/24
 firewall_allowed_udp_ports: []
 firewall_forwarded_tcp_ports: []
 firewall_forwarded_udp_ports: []
@@ -17,3 +27,6 @@ firewall_log_dropped_packets: true
 # Set to true to ensure other firewall management software is disabled.
 firewall_disable_firewalld: false
 firewall_disable_ufw: false
+
+
+firewall_keep_docker_rules: false

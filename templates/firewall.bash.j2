@@ -19,7 +19,7 @@
 #   9000: SonarQube
 #
 # @author Jeff Geerling
-
+set -ex
 # No spoofing.
 if [ -e /proc/sys/net/ipv4/conf/all/rp_filter ]
 then
@@ -54,11 +54,46 @@ iptables -t nat -I OUTPUT -p udp -o lo --dport {{ forwarded_port.src }} -j REDIR
 
 # Open ports.
 {# Add a rule for each open port #}
-{% for port in firewall_allowed_tcp_ports %}
-iptables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT
-{% endfor %}
+{% for port in firewall_allowed_tcp_ports -%}
+    {%- set _rule=port -%}
+    {%- if _rule is not mapping -%}
+        {%- set _rule={'port': port} -%}
+    {%- endif -%}
+    {%- set _rule={'deny': False, 'allow': ['0.0.0.0/0']}|combine(_rule) -%}
+    {%- if _rule.allow is string %}
+        {%- set _=_rule.update({'allow': [_rule.allow]}) -%}
+    {%- endif -%}
+    {%- if _rule.deny is string -%}
+        {%- set _=_rule.update({'deny': [_rule.deny]}) -%}
+    {%- endif -%}
+    {%- if _rule.deny is sameas true %}
+        {%- set _=_rule.update({'deny': ['0.0.0.0/0']}) -%}
+    {%- endif -%}
+iptables -A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
+    {% if _rule.deny %}
+iptables -A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP
+    {% endif %}
+{%- endfor %}
+#UDP
 {% for port in firewall_allowed_udp_ports %}
-iptables -A INPUT -p udp -m udp --dport {{ port }} -j ACCEPT
+    {%- set _rule=port -%}
+    {%- if _rule is not mapping -%}
+        {%- set _rule={'port': port} -%}
+    {%- endif  -%}
+    {%- set _rule={'deny': False, 'allow': ['0.0.0.0/0']}|combine(_rule) -%}
+    {%- if _rule.allow is string %}
+        {%- set _=_rule.update({'allow': [_rule.allow]}) -%}
+    {%- endif -%}
+    {%- if _rule.deny is string -%}
+        {%- set _=_rule.update({'deny': [_rule.deny]}) -%}
+    {%- endif -%}
+    {%- if _rule.deny is sameas true %}
+        {%- set _=_rule.update({'deny': ['0.0.0.0/0']}) -%}
+    {%- endif -%}
+iptables -A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
+    {% if _rule.deny -%}
+iptables -A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP
+    {% endif -%}
 {% endfor %}
 
 # Accept icmp ping requests.
@@ -71,6 +106,10 @@ iptables -A INPUT -p udp --sport 123 -j ACCEPT
 # Additional custom rules.
 {% for rule in firewall_additional_rules %}
 {{ rule }}
+{% endfor %}
+
+{% for rule in firewall_docker_rules|default([]) %}
+iptables {{ rule }}
 {% endfor %}
 
 # Allow established connections:
@@ -87,6 +126,7 @@ iptables -A INPUT -m limit --limit 15/minute -j LOG --log-level 7 --log-prefix "
 # Drop all other traffic.
 iptables -A INPUT -j DROP
 
+{% if firewall_ipv6 %}
 
 # Configure IPv6 if ip6tables is present.
 if [ -x "$(which ip6tables 2>/dev/null)" ]; then
@@ -101,10 +141,45 @@ if [ -x "$(which ip6tables 2>/dev/null)" ]; then
   # Open ports.
   {# Add a rule for each open port #}
   {% for port in firewall_allowed_tcp_ports %}
-  ip6tables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT
+      {%- set _rule=port -%}
+      {%- if _rule is not mapping -%}
+          {%- set _rule={'port': port} -%}
+      {%- endif  -%}
+      {%- set _rule={'deny': False, 'allow': ['0.0.0.0/0']}|combine(_rule) -%}
+      {%- if _rule.allow is string %}
+          {%- set _=_rule.update({'allow': [_rule.allow]}) -%}
+      {%- endif -%}
+      {%- if _rule.deny is string -%}
+          {%- set _=_rule.update({'deny': [_rule.deny]}) -%}
+      {%- endif -%}
+      {%- if _rule.deny is sameas true %}
+          {%- set _=_rule.update({'deny': ['0.0.0.0/0']}) -%}
+      {%- endif %}
+  ip6tables -A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
+      {% if _rule.deny %}
+  ip6tables -A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP
+      {% endif -%}
   {% endfor %}
+  # UDP
   {% for port in firewall_allowed_udp_ports %}
-  ip6tables -A INPUT -p udp -m udp --dport {{ port }} -j ACCEPT
+      {%- set _rule=port -%}
+      {%- if _rule is not mapping -%}
+          {%- set _rule={'port': port} -%}
+      {%- endif  -%}
+      {%- set _rule={'deny': False, 'allow': ['0.0.0.0/0']}|combine(_rule) -%}
+      {%- if _rule.allow is string %}
+          {%- set _=_rule.update({'allow': [_rule.allow]}) -%}
+      {%- endif -%}
+      {%- if _rule.deny is string -%}
+          {%- set _=_rule.update({'deny': [_rule.deny]}) -%}
+      {%- endif -%}
+      {%- if _rule.deny is sameas true %}
+          {%- set _=_rule.update({'deny': ['0.0.0.0/0']}) -%}
+      {%- endif %}
+  ip6tables -A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
+      {% if _rule.deny -%}
+  ip6tables -A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP
+      {% endif %}
   {% endfor %}
 
   # Accept icmp ping requests.
@@ -113,6 +188,10 @@ if [ -x "$(which ip6tables 2>/dev/null)" ]; then
   # Allow NTP traffic for time synchronization.
   ip6tables -A OUTPUT -p udp --dport 123 -j ACCEPT
   ip6tables -A INPUT -p udp --sport 123 -j ACCEPT
+
+    {% for rule in firewall_docker_rules|default([]) %}
+        ip6tables {{ rule }}
+    {% endfor %}
 
   # Additional custom rules.
   {% for rule in firewall_ip6_additional_rules %}
@@ -134,3 +213,4 @@ if [ -x "$(which ip6tables 2>/dev/null)" ]; then
   ip6tables -A INPUT -j DROP
 
 fi
+{% endif %}

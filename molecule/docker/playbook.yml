@@ -1,0 +1,22 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    docker_storage_driver: vfs
+    docker_daemon_opts:
+      data-root: /opt/docker/
+
+    firewall_ipv6: false
+    firewall_allowed_tcp_ports:
+      - "22"
+      - "25"
+      - "80"
+    firewall_keep_docker_rules: true
+
+  pre_tasks:
+    - include_role:
+        name: apkawa.docker
+  tasks:
+    - name: test role
+      include_role:
+        name: ansible-role-firewall
