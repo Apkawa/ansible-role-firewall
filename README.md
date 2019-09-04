@@ -20,12 +20,26 @@ Available variables are listed below, along with default values (see `defaults/m
     firewall_enabled_at_boot: true
 
 Controls the state of the firewall service; whether it should be running (`firewall_state`) and/or enabled on system boot (`firewall_enabled_at_boot`).
+```yaml
 
     firewall_allowed_tcp_ports:
       - "22"
       - "80"
-      ...
+     - port: 1042
+       allow: 8.8.8.8
+       # or
+       allow: 8.8.8.0/24
+       # or 
+       allow: ['8.8.8.1', '8.8.8.2']
+       # default is false
+       deny: yes # 0.0.0.0/0
+       # or
+       deny: 8.8.4.0/24
+       # or
+       deny: ['8.8.4.4', '0.0.0.0/0']
+     ...  
     firewall_allowed_udp_ports: []
+```
 
 A list of TCP or UDP ports (respectively) to open to incoming traffic.
 
@@ -59,6 +73,15 @@ Whether to log dropped packets to syslog (messages will be prefixed with "Droppe
     firewall_disable_ufw: false
 
 Set to `true` to disable firewalld (installed by default on RHEL/CentOS) or ufw (installed by default on Ubuntu), respectively.
+
+### Docker
+
+For use custom rule firewall and keep auto generated docker rules 
+
+```yaml
+firewall_keep_docker_rules: true
+```
+And run dockerd before firewall rule
 
 ## Dependencies
 

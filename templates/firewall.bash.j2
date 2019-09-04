@@ -54,42 +54,14 @@ iptables -t nat -I OUTPUT -p udp -o lo --dport {{ forwarded_port.src }} -j REDIR
 
 # Open ports.
 {# Add a rule for each open port #}
-{% for port in firewall_allowed_tcp_ports -%}
-    {%- set _rule=port -%}
-    {%- if _rule is not mapping -%}
-        {%- set _rule={'port': port} -%}
-    {%- endif -%}
-    {%- set _rule={'deny': False, 'allow': ['0.0.0.0/0']}|combine(_rule) -%}
-    {%- if _rule.allow is string %}
-        {%- set _=_rule.update({'allow': [_rule.allow]}) -%}
-    {%- endif -%}
-    {%- if _rule.deny is string -%}
-        {%- set _=_rule.update({'deny': [_rule.deny]}) -%}
-    {%- endif -%}
-    {%- if _rule.deny is sameas true %}
-        {%- set _=_rule.update({'deny': ['0.0.0.0/0']}) -%}
-    {%- endif -%}
+{% for _rule in firewall_allowed_tcp_ports -%}
 iptables -A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
     {% if _rule.deny %}
 iptables -A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP
     {% endif %}
 {%- endfor %}
 #UDP
-{% for port in firewall_allowed_udp_ports %}
-    {%- set _rule=port -%}
-    {%- if _rule is not mapping -%}
-        {%- set _rule={'port': port} -%}
-    {%- endif  -%}
-    {%- set _rule={'deny': False, 'allow': ['0.0.0.0/0']}|combine(_rule) -%}
-    {%- if _rule.allow is string %}
-        {%- set _=_rule.update({'allow': [_rule.allow]}) -%}
-    {%- endif -%}
-    {%- if _rule.deny is string -%}
-        {%- set _=_rule.update({'deny': [_rule.deny]}) -%}
-    {%- endif -%}
-    {%- if _rule.deny is sameas true %}
-        {%- set _=_rule.update({'deny': ['0.0.0.0/0']}) -%}
-    {%- endif -%}
+{% for _rule in firewall_allowed_udp_ports %}
 iptables -A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
     {% if _rule.deny -%}
 iptables -A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP
@@ -140,42 +112,14 @@ if [ -x "$(which ip6tables 2>/dev/null)" ]; then
 
   # Open ports.
   {# Add a rule for each open port #}
-  {% for port in firewall_allowed_tcp_ports %}
-      {%- set _rule=port -%}
-      {%- if _rule is not mapping -%}
-          {%- set _rule={'port': port} -%}
-      {%- endif  -%}
-      {%- set _rule={'deny': False, 'allow': ['0.0.0.0/0']}|combine(_rule) -%}
-      {%- if _rule.allow is string %}
-          {%- set _=_rule.update({'allow': [_rule.allow]}) -%}
-      {%- endif -%}
-      {%- if _rule.deny is string -%}
-          {%- set _=_rule.update({'deny': [_rule.deny]}) -%}
-      {%- endif -%}
-      {%- if _rule.deny is sameas true %}
-          {%- set _=_rule.update({'deny': ['0.0.0.0/0']}) -%}
-      {%- endif %}
+  {% for _rule in firewall_allowed_tcp_ports %}
   ip6tables -A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
       {% if _rule.deny %}
   ip6tables -A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP
       {% endif -%}
   {% endfor %}
   # UDP
-  {% for port in firewall_allowed_udp_ports %}
-      {%- set _rule=port -%}
-      {%- if _rule is not mapping -%}
-          {%- set _rule={'port': port} -%}
-      {%- endif  -%}
-      {%- set _rule={'deny': False, 'allow': ['0.0.0.0/0']}|combine(_rule) -%}
-      {%- if _rule.allow is string %}
-          {%- set _=_rule.update({'allow': [_rule.allow]}) -%}
-      {%- endif -%}
-      {%- if _rule.deny is string -%}
-          {%- set _=_rule.update({'deny': [_rule.deny]}) -%}
-      {%- endif -%}
-      {%- if _rule.deny is sameas true %}
-          {%- set _=_rule.update({'deny': ['0.0.0.0/0']}) -%}
-      {%- endif %}
+  {% for _rule in firewall_allowed_udp_ports %}
   ip6tables -A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
       {% if _rule.deny -%}
   ip6tables -A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP

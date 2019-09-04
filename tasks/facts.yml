@@ -1,0 +1,17 @@
+---
+
+- name: Remap tcp rules
+  include: include/remap_port_rules.yml
+  vars:
+    rules: "{{ firewall_allowed_tcp_ports }}"
+    rules_fact_name: firewall_allowed_tcp_ports
+
+# - debug: var=firewall_allowed_tcp_ports
+
+- name: Remap udp rules
+  include: include/remap_port_rules.yml
+  vars:
+    rules: "{{ firewall_allowed_udp_ports }}"
+    rules_fact_name: firewall_allowed_udp_ports
+
+# - debug: var=firewall_allowed_udp_ports

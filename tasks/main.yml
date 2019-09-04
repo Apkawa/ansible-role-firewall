@@ -10,6 +10,8 @@
     iptables -F
     creates=/etc/firewall.bash
 
+- include: facts.yml
+
 - name: Copy firewall script into place.
   template:
     src: firewall.bash.j2

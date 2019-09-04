@@ -37,6 +37,7 @@ matrix:
     - python: "2.7"
     - env: TOX_ENV=ubuntu1404
     - env: TOX_ENV=centos6
+    - env: TOX_ENV=fedora27
     - env: TOX_ENV=ansible24-centos7
     - env: TOX_ENV=ansible24-debian10
 

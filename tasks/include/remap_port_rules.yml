@@ -1,0 +1,33 @@
+---
+
+- name: remap rules
+  set_fact:
+    _rules: >-
+      {%- set new_rules=[] -%}
+      {%- for port in rules -%}
+        {%- set _rule=port -%}
+
+        {%- if _rule is not mapping -%}
+          {%- set _rule={'port': port} -%}
+        {%- endif -%}
+
+        {%- set _rule={'deny': False, 'allow': ['0.0.0.0/0']}|combine(_rule) -%}
+
+        {%- if _rule.allow is string -%}
+          {%- set _=_rule.update({'allow': [_rule.allow]}) -%}
+        {%- endif -%}
+
+        {%- if _rule.deny is string -%}
+          {%- set _=_rule.update({'deny': [_rule.deny]}) -%}
+        {%- endif -%}
+
+        {%- if _rule.deny is sameas true -%}
+          {%- set _=_rule.update({'deny': ['0.0.0.0/0']}) -%}
+        {%- endif -%}
+        {%- set _=new_rules.append(_rule) -%}
+
+      {%- endfor -%}
+      {{ new_rules }}
+
+- name: store fact
+  set_fact: {"{{ rules_fact_name }}": "{{ _rules }}"}
