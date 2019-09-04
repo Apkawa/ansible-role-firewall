@@ -23,20 +23,21 @@ Controls the state of the firewall service; whether it should be running (`firew
 ```yaml
 
     firewall_allowed_tcp_ports:
-      - "22"
+      - "22" # important: keep opened ssh port!
       - "80"
-     - port: 1042
-       allow: 8.8.8.8
-       # or
-       allow: 8.8.8.0/24
-       # or 
-       allow: ['8.8.8.1', '8.8.8.2']
-       # default is false
-       deny: yes # 0.0.0.0/0
-       # or
-       deny: 8.8.4.0/24
-       # or
-       deny: ['8.8.4.4', '0.0.0.0/0']
+      - port: 1042
+        # default is 0.0.0.0/0
+        allow: 8.8.8.8
+        # or
+        allow: 8.8.8.0/24
+        # or 
+        allow: ['8.8.8.1', '8.8.8.2']
+        # default is false
+        deny: yes # 0.0.0.0/0
+        # or
+        deny: 8.8.4.0/24
+        # or
+        deny: ['8.8.4.4', '0.0.0.0/0']
      ...  
     firewall_allowed_udp_ports: []
 ```
