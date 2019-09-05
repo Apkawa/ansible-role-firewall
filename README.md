@@ -2,6 +2,10 @@
 
 [![Build Status](https://travis-ci.org/apkawa/ansible-role-firewall.svg?branch=master)](https://travis-ci.org/apkawa/ansible-role-firewall)
 
+[![Ansible role](https://img.shields.io/ansible/role/43097.svg)](https://galaxy.ansible.com/apkawa/docker)
+[![Ansible role downloads](https://img.shields.io/ansible/role/d/43097.svg)](https://galaxy.ansible.com/apkawa/docker)
+[![Ansible role quality](https://img.shields.io/ansible/quality/43097.svg)](https://galaxy.ansible.com/apkawa/docker)
+
 Installs an iptables-based firewall for Linux. Supports both IPv4 (`iptables`) and IPv6 (`ip6tables`).
 
 This firewall aims for simplicity over complexity, and only opens a few specific ports for incoming traffic (configurable through Ansible variables). If you have a rudimentary knowledge of `iptables` and/or firewalls in general, this role should be a good starting point for a secure system firewall.
@@ -21,25 +25,24 @@ Available variables are listed below, along with default values (see `defaults/m
 
 Controls the state of the firewall service; whether it should be running (`firewall_state`) and/or enabled on system boot (`firewall_enabled_at_boot`).
 ```yaml
-
-    firewall_allowed_tcp_ports:
-      - "22" # important: keep opened ssh port!
-      - "80"
-      - port: 1042
-        # default is 0.0.0.0/0
-        allow: 8.8.8.8
-        # or
-        allow: 8.8.8.0/24
-        # or 
-        allow: ['8.8.8.1', '8.8.8.2']
-        # default is false
-        deny: yes # 0.0.0.0/0
-        # or
-        deny: 8.8.4.0/24
-        # or
-        deny: ['8.8.4.4', '0.0.0.0/0']
-     ...  
-    firewall_allowed_udp_ports: []
+firewall_allowed_tcp_ports:
+  - "22" # important: keep opened ssh port!
+  - "80"
+  - port: 1042
+    # default is 0.0.0.0/0
+    allow: 8.8.8.8
+    # or
+    allow: 8.8.8.0/24
+    # or 
+    allow: ['8.8.8.1', '8.8.8.2']
+    # default is false
+    deny: yes # 0.0.0.0/0
+    # or
+    deny: 8.8.4.0/24
+    # or
+    deny: ['8.8.4.4', '0.0.0.0/0']
+ ...  
+firewall_allowed_udp_ports: []
 ```
 
 A list of TCP or UDP ports (respectively) to open to incoming traffic.
@@ -94,12 +97,14 @@ None.
       vars_files:
         - vars/main.yml
       roles:
-        - { role: geerlingguy.firewall }
+        - { role: apkawa.firewall }
 
 *Inside `vars/main.yml`*:
 
     firewall_allowed_tcp_ports:
-      - "22"
+      - port: 22
+        allow: 10.10.5.0/24
+        deny: yes
       - "25"
       - "80"
 
