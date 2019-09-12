@@ -2,9 +2,9 @@
 
 [![Build Status](https://travis-ci.org/apkawa/ansible-role-firewall.svg?branch=master)](https://travis-ci.org/apkawa/ansible-role-firewall)
 
-[![Ansible role](https://img.shields.io/ansible/role/43097.svg)](https://galaxy.ansible.com/apkawa/docker)
-[![Ansible role downloads](https://img.shields.io/ansible/role/d/43097.svg)](https://galaxy.ansible.com/apkawa/docker)
-[![Ansible role quality](https://img.shields.io/ansible/quality/43097.svg)](https://galaxy.ansible.com/apkawa/docker)
+[![Ansible role](https://img.shields.io/ansible/role/43130.svg)](https://galaxy.ansible.com/apkawa/firewall)
+[![Ansible role downloads](https://img.shields.io/ansible/role/d/43130.svg)](https://galaxy.ansible.com/apkawa/firewall)
+[![Ansible role quality](https://img.shields.io/ansible/quality/43130.svg)](https://galaxy.ansible.com/apkawa/firewall)
 
 Installs an iptables-based firewall for Linux. Supports both IPv4 (`iptables`) and IPv6 (`ip6tables`).
 
@@ -120,3 +120,5 @@ MIT / BSD
 ## Author Information
 
 This role was created in 2014 by [Jeff Geerling](https://www.jeffgeerling.com/), author of [Ansible for DevOps](https://www.ansiblefordevops.com/).
+
+Forked by [Apkawa](https://github.com/Apkawa/)
