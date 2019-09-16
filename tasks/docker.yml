@@ -6,6 +6,11 @@
   register: _docker_rules
   changed_when: "'error' in _docker_rules.stdout"
 
+- name: Save nat docker rules
+  command: iptables -S  -t nat
+  register: _docker_nat_rules
+  changed_when: "'error' in _docker_rules.stdout"
+
 - debug: var=_docker_rules
 
 - name: Store DOCKER chain rules
@@ -13,8 +18,13 @@
     firewall_docker_rules: >-
       {%- set rules=['-A INPUT -i docker0 -j ACCEPT'] %}
       {%- for line in _docker_rules.stdout.splitlines() %}
-        {%- if 'DOCKER' in line -%}
+        {%- if ('docker' in line.lower() or 'br-' in line) and line not in rules -%}
           {%- set _=rules.append(line) -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- for line in _docker_nat_rules.stdout.splitlines() %}
+        {%- if line not in rules -%}
+          {%- set _=rules.append('-t nat ' + line) -%}
         {%- endif -%}
       {%- endfor -%}
       {{ rules }}
