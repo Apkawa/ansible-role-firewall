@@ -16,7 +16,7 @@
 - name: Store DOCKER chain rules
   set_fact:
     firewall_docker_rules: >-
-      {%- set rules=['-A INPUT -i docker0 -j ACCEPT'] %}
+      {%- set rules=['-I INPUT -i docker0 -j ACCEPT'] %}
       {%- for line in _docker_rules.stdout.splitlines() %}
         {%- if ('docker' in line.lower() or 'br-' in line)
                 and line not in rules -%}

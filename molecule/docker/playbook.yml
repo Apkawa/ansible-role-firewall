@@ -11,6 +11,11 @@
       - "22"
       - "25"
       - "80"
+      - port: 2777
+        allow:
+          - localhost
+        deny: true
+
     firewall_keep_docker_rules: true
 
   pre_tasks:
