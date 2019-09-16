@@ -18,7 +18,8 @@
     firewall_docker_rules: >-
       {%- set rules=['-A INPUT -i docker0 -j ACCEPT'] %}
       {%- for line in _docker_rules.stdout.splitlines() %}
-        {%- if ('docker' in line.lower() or 'br-' in line) and line not in rules -%}
+        {%- if ('docker' in line.lower() or 'br-' in line)
+                and line not in rules -%}
           {%- set _=rules.append(line) -%}
         {%- endif -%}
       {%- endfor -%}
