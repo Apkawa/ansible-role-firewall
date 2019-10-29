@@ -1,0 +1,86 @@
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:FILTERS - [0:0]
+:DOCKER-USER - [0:0]
+
+
+-F INPUT
+-F DOCKER-USER
+-F FILTERS
+
+# Accept traffic from loopback interface (localhost).
+-A INPUT -i lo -j ACCEPT
+# Accept icmp ping requests.
+-A INPUT -p icmp -j ACCEPT
+
+# Allow NTP traffic for time synchronization.
+-A OUTPUT -p udp --dport 123 -j ACCEPT
+-A INPUT -p udp --sport 123 -j ACCEPT
+
+
+# Open ports.
+# Add a rule for each open port #
+{% for _rule in firewall_allowed_tcp_ports %}
+-A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
+{% if _rule.deny %}
+-A INPUT -p tcp -m tcp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP
+{% endif %}
+{% endfor %}
+
+#UDP
+{% for _rule in firewall_allowed_udp_ports %}
+-A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.allow|join(',') }} -j ACCEPT
+{% if _rule.deny %}
+-A INPUT -p udp -m udp --dport {{ _rule.port }} -s {{ _rule.deny|join(',') }} -j DROP
+{% endif %}
+{% endfor %}
+
+# Additional docker rules.
+{% for rule in firewall_docker_rules|default([]) %}
+{{ rule }}
+{% endfor %}
+
+# Additional custom rules.
+{% for rule in firewall_additional_rules %}
+{{ rule }}
+{% endfor %}
+
+# Allow established connections:
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Log EVERYTHING (ONLY for Debug).
+# iptables -A INPUT -j LOG
+
+{% if firewall_log_dropped_packets %}
+# Log other incoming requests (all of which are dropped) at 15/minute max.
+-A INPUT -m limit --limit 15/minute -j LOG --log-level 7 --log-prefix "Dropped by firewall: "
+{% endif %}
+
+# Drop all other traffic.
+-A INPUT -j DROP
+
+COMMIT
+
+## Nat rules
+
+* nat
+:PREROUTING ACCEPT [7677:439309]
+:INPUT ACCEPT [1749:79741]
+:OUTPUT ACCEPT [655:39886]
+:POSTROUTING ACCEPT [6387:382798]
+
+# Forwarded ports.
+{# Add a rule for each forwarded port #}
+{% for forwarded_port in firewall_forwarded_tcp_ports %}
+-I PREROUTING -p tcp --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+-I OUTPUT -p tcp -o lo --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+{% endfor %}
+{% for forwarded_port in firewall_forwarded_udp_ports %}
+-I PREROUTING -p udp --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+-I OUTPUT -p udp -o lo --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+{% endfor %}
+
+COMMIT
+

@@ -16,7 +16,9 @@
           - localhost
         deny: true
 
-    firewall_keep_docker_rules: true
+    firewall_keep_old_rules: true
+    firewall_additional_rules:
+      -
 
   pre_tasks:
     - include_role:

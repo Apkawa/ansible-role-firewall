@@ -2,13 +2,14 @@
 - name: Ensure iptables is present.
   package: name=iptables state=present
 
+# todo check docker
 - include: docker.yml
-  when: firewall_keep_docker_rules
 
 - name: Flush iptables the first time playbook runs.
   command: >
     iptables -F
     creates=/etc/firewall.bash
+  when: not firewall_keep_old_rules
 
 - include: facts.yml
 
@@ -16,6 +17,15 @@
   template:
     src: firewall.bash.j2
     dest: /etc/firewall.bash
+    owner: root
+    group: root
+    mode: 0744
+  notify: restart firewall
+
+- name: Copy firewall script into place.
+  template:
+    src: firewall.rules.j2
+    dest: /etc/firewall.rules
     owner: root
     group: root
     mode: 0744

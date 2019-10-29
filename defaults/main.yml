@@ -29,4 +29,4 @@ firewall_disable_firewalld: false
 firewall_disable_ufw: false
 
 
-firewall_keep_docker_rules: false
+firewall_keep_old_rules: false
